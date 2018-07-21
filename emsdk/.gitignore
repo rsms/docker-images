@@ -1,0 +1,4 @@
+*-dev
+/example/build
+/example/hello.js
+/example/hello.wasm

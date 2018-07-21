@@ -1,0 +1,40 @@
+ninja_required_version = 1.3
+outdir = build
+
+# flags for emcc
+# Note that none of these are needed for emcc to work. they are just
+# here for demonstration.
+c_flags = $
+  -Wall $
+  -O3 $
+  --llvm-lto 0 $
+  --llvm-opts 2 $
+  -s WASM=1 $
+  -s NO_EXIT_RUNTIME=1 $
+  -s NO_FILESYSTEM=1 $
+  -s ABORTING_MALLOC=0 $
+  -s ALLOW_MEMORY_GROWTH=1 $
+  -s DISABLE_EXCEPTION_CATCHING=1 $
+  -s ERROR_ON_UNDEFINED_SYMBOLS=1 $
+  -s NO_EXIT_RUNTIME=1 $
+  -s NO_FILESYSTEM=1 $
+  -s "BINARYEN_TRAP_MODE='clamp'"
+
+rule emcc
+  command = emcc $c_flags $in -o $out
+  description = emcc $out
+
+rule mkdirs
+  command = mkdir -vp $out
+
+# main objects
+build $outdir/obj/hello.bc: emcc hello.c
+
+# main program
+build $outdir/hello.js: emcc $outdir/obj/hello.bc | $outdir/obj
+
+build $outdir/obj: mkdirs
+
+build hello: phony $outdir/hello.js
+
+default hello

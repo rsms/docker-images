@@ -1,0 +1,6 @@
+.DS_Store
+.ninja*
+*.tar.gz
+*.tgz
+*.o
+*.a
