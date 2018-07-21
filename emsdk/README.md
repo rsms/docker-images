@@ -45,9 +45,8 @@ $ node hello.js
 Hello World
 ```
 
-Since the image comes with ninja, you can build a ninja project in an
-effective way by mounting your source directory at `/src` and invoking
-ninja:
+This image comes with ninja so that you can build ninja projects in an
+effective way:
 
 ```
 $ cd example
