@@ -4,9 +4,11 @@ FROM bitnami/minideb:stretch
 # to enable support of closure compiler in Emscripten, though doing so
 # drastically increases the image size.
 
+ENV EMSCRIPTEN_VERSION 1.38.11
+
 RUN apt-get -qq update \
   && apt-get install -y -qq --no-install-recommends \
-     curl python cmake build-essential ninja-build ca-certificates \
+     git curl python cmake build-essential ninja-build ca-certificates \
   && mkdir ~/emsdk0 \
   && cd ~/emsdk0 \
   && curl -L# 'https://github.com/juj/emsdk/archive/master.tar.gz' | tar xzf - \
@@ -16,11 +18,12 @@ RUN apt-get -qq update \
   && ./emsdk update \
   && ./emsdk install latest \
   && ./emsdk activate latest \
+  && echo "EMSCRIPTEN_VERSION: $EMSCRIPTEN_VERSION" \
   && /bin/bash emsdk_env.sh >/dev/null
 
 SHELL ["/bin/bash", "-c"]
 
-COPY example/hello.c /root/hello.c
+COPY a.cc /root/a.cc
 
 RUN source /emsdk/emsdk_env.sh >/dev/null \
   && echo "PATH=$PATH" >> /root/env \
@@ -29,8 +32,8 @@ RUN source /emsdk/emsdk_env.sh >/dev/null \
   && echo "EMSCRIPTEN=$EMSCRIPTEN" >> /root/env \
   && echo $EMSCRIPTEN | sed -E 's/.+\/([^\/]+)$/EMSCRIPTEN_VERSION=\1/' >> /root/env \
   && cd /root \
-  && emcc hello.c -s WASM=1 -o hello.js \
-  && rm hello.c hello.js
+  && emcc a.cc -s WASM=1 -o a.js \
+  && rm a.*
 
 # the emcc line above causes emscripten to generate and cache things like
 # internal configuration and libc, greatly speeding up subsequent invocations.
@@ -47,7 +50,7 @@ RUN cd /emsdk \
      -name "*.a" -or \
      -name "*.tmp" \
      -exec rm {} \; \
-  && apt-get -y --purge remove curl cmake build-essential \
+  && apt-get -y --purge remove git curl cmake build-essential \
   && apt-get -y autoremove \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*

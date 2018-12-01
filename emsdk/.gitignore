@@ -2,3 +2,5 @@
 /example/build
 /example/hello.js
 /example/hello.wasm
+a.wasm
+a.js
