@@ -4,11 +4,12 @@ FROM bitnami/minideb:stretch
 # to enable support of closure compiler in Emscripten, though doing so
 # drastically increases the image size.
 
-ENV EMSCRIPTEN_VERSION 1.38.11
+ENV EMSCRIPTEN_VERSION 1.38.20
 
 RUN apt-get -qq update \
   && apt-get install -y -qq --no-install-recommends \
-     git curl python cmake build-essential ninja-build ca-certificates \
+     git curl python3 cmake build-essential ninja-build ca-certificates \
+  && ln -s /usr/bin/python3 /usr/bin/python \
   && mkdir ~/emsdk0 \
   && cd ~/emsdk0 \
   && curl -L# 'https://github.com/juj/emsdk/archive/master.tar.gz' | tar xzf - \
@@ -32,11 +33,14 @@ RUN source /emsdk/emsdk_env.sh >/dev/null \
   && echo "EMSCRIPTEN=$EMSCRIPTEN" >> /root/env \
   && echo $EMSCRIPTEN | sed -E 's/.+\/([^\/]+)$/EMSCRIPTEN_VERSION=\1/' >> /root/env \
   && cd /root \
-  && emcc a.cc -s WASM=1 -o a.js \
-  && rm a.*
+  && EMCC_CORES=8 python3 /emsdk/emscripten/*/embuilder.py build ALL \
+  && emcc a.cc -s WASM=1 -o a.js -O0 \
+  && rm a.js a.wasm*
 
-# the emcc line above causes emscripten to generate and cache things like
-# internal configuration and libc, greatly speeding up subsequent invocations.
+# emcc and embuilder.py above causes emscripten to generate and cache
+# libc et al, greatly speeding up invocation.
+# embuilder.py command from CI config:
+# https://github.com/kripken/emscripten/blob/master/.circleci/config.yml
 
 # Cleaning
 RUN cd /emsdk \

@@ -58,7 +58,7 @@ if [ "$EMSCRIPTEN_VERSION" = "" ]; then
   echo "failed to find EMSCRIPTEN_VERSION in image's /root/env -- skipping version tagging" >&2
 else
   echo "EMSCRIPTEN_VERSION: $EMSCRIPTEN_VERSION"
-  docker tag $IMAGE_NAME:$EMSCRIPTEN_VERSION $IMAGE_NAME:latest
+  docker tag $IMAGE_NAME:latest $IMAGE_NAME:$EMSCRIPTEN_VERSION
 fi
 
 echo "Testing the image: building test case"

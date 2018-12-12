@@ -7,11 +7,31 @@ Contains:
 - Debian "stretch" (bitnami/minideb:stretch)
 - [Emscripten SDK](https://kripken.github.io/emscripten-site/),
   which includes [Clang](https://clang.llvm.org/)
-- Python 2.7 (required by emscripten)
+- Python 3.5 (required by emscripten)
 - [Nodejs 8.9](https://nodejs.org/) (required by emscripten)
 - [Ninja 1.7](https://ninja-build.org/)
 
-Tags:
+
+Prebuilt Emscripten ports:
+
+- bullet
+- cocos2d
+- dlmalloc
+- emmalloc
+- freetype
+- gl
+- harfbuzz
+- libpng
+- ogg
+- pthreads
+- sdl2
+- vorbis
+- zlib
+
+[See full list of prebuilt libraries](https://github.com/kripken/emscripten/blob/bef3bb0a3f113a57edb3b6afca4c79a345453eff/embuilder.py#L35)
+
+
+Docker tags:
 
 - `rsms/emsdk:latest` -- most recent Emscripten version
 - `rsms/emsdk:<version>` -- specific version of Emscripten, where `<version>`
