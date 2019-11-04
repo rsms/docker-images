@@ -30,6 +30,7 @@ fi
 # build the image
 echo "Building image. This might take a while..."
 docker build -f Dockerfile -t $BUILD_IMAGE_NAME --squash .
+# docker build -f Dockerfile -t $BUILD_IMAGE_NAME .
 
 # read values of /root/env which we will later transfer to ENV of new container
 EMSCRIPTEN_VERSION=

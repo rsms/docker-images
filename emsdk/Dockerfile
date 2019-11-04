@@ -4,15 +4,15 @@ FROM bitnami/minideb:stretch
 # to enable support of closure compiler in Emscripten, though doing so
 # drastically increases the image size.
 
-ENV EMSCRIPTEN_VERSION 1.38.20
+ENV EMSCRIPTEN_VERSION 1.39.1
 
 RUN apt-get -qq update \
   && apt-get install -y -qq --no-install-recommends \
-     git curl python3 cmake build-essential ninja-build ca-certificates \
+     git curl python3 cmake build-essential ninja-build ca-certificates libtinfo5 \
   && ln -s /usr/bin/python3 /usr/bin/python \
   && mkdir ~/emsdk0 \
   && cd ~/emsdk0 \
-  && curl -L# 'https://github.com/juj/emsdk/archive/master.tar.gz' | tar xzf - \
+  && curl -L# 'https://github.com/emscripten-core/emsdk/archive/master.tar.gz' | tar xzf - \
   && mv *emsdk* /emsdk \
   && cd /emsdk \
   && rm -rf ~/emsdk0 \
@@ -31,9 +31,9 @@ RUN source /emsdk/emsdk_env.sh >/dev/null \
   && echo "EMSDK=$EMSDK" >> /root/env \
   && echo "EM_CONFIG=$EM_CONFIG" >> /root/env \
   && echo "EMSCRIPTEN=$EMSCRIPTEN" >> /root/env \
-  && echo $EMSCRIPTEN | sed -E 's/.+\/([^\/]+)$/EMSCRIPTEN_VERSION=\1/' >> /root/env \
+  && echo "EMSCRIPTEN_VERSION=$EMSCRIPTEN_VERSION" >> /root/env \
   && cd /root \
-  && EMCC_CORES=8 python3 /emsdk/emscripten/*/embuilder.py build ALL \
+  && EMCC_CORES=6 python3 /emsdk/upstream/emscripten/embuilder.py build ALL \
   && emcc a.cc -s WASM=1 -o a.js -O0 \
   && rm a.js a.wasm*
 
@@ -45,6 +45,8 @@ RUN source /emsdk/emsdk_env.sh >/dev/null \
 # Cleaning
 RUN cd /emsdk \
   && rm -rf \
+     /root/.emscripten_cache/wasm-obj/ports-builds \
+     /root/.emscripten_ports \
      emscripten/tag-*/tests \
      emscripten/tag-*/site \
      emscripten/tag-*/docs \
@@ -55,9 +57,18 @@ RUN cd /emsdk \
      -name "*.tmp" \
      -exec rm {} \; \
   && apt-get -y --purge remove git curl cmake build-essential \
-  && apt-get -y autoremove \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+# Note: Starting with 1.39 (at least), the follwing:
+#   apt-get -y autoremove
+# when run as part of cleanup causes emsdk to break with the following error:
+#   clang++: error while loading shared libraries: libxml2.so.2:
+#   cannot open shared object file: No such file or directory
+# See:
+# - https://github.com/emscripten-core/emsdk/issues/252
+# - https://github.com/emscripten-core/emscripten/issues/8697
+#
 
 VOLUME /src
 WORKDIR /src
